@@ -26,6 +26,12 @@
 
 # PARAMETERS CELL ********************
 
+# ------------------------------------------------------------------------------
+# PARAMETER DEFINITION
+# - job_run_id : Unique identifier for tracking pipeline execution runs
+# - file_name  : Target source file name for processing
+# Note: Marked as parameter cell for dynamic runtime overriding
+# ------------------------------------------------------------------------------
 
 job_run_id = ""
 file_name=""
@@ -41,13 +47,17 @@ file_name=""
 
 
 
-# --- STEP 2: REST OF YOUR CODE ---
+# ------------------------------------------------------------------------------
+# 1. Utility & Spark Function Imports
+# ------------------------------------------------------------------------------
 from notebookutils import mssparkutils
 from pyspark.sql.functions import current_timestamp, input_file_name, lit, col
 
-# Use the variables directly (no .get() needed)
-source_folder ="Files/landing"
-table_name =  "bronze.bronze_transactions"
+# ------------------------------------------------------------------------------
+# 2. Variable & Target Delta Table Definitions
+# ------------------------------------------------------------------------------
+source_folder = "Files/landing"
+table_name = "bronze.bronze_transactions"
 print(f"Loading data into table: {table_name}")
 
 # METADATA ********************
@@ -63,7 +73,7 @@ from pathlib import Path
 from notebookutils import mssparkutils
 from pyspark.sql.functions import col, current_timestamp, input_file_name, lit
 
-# --- CONFIGURATION & SETUP ---
+# Base paths & safety thresholds
 source_folder = "Files/landing"
 threshold_percentage = 0.10
 
@@ -75,17 +85,18 @@ threshold_percentage = 0.10
 #)
 run_id = job_run_id if "job_run_id" in locals() else "local_run"
 
-# Construct source file path safely using Path
+# Construct file path
 source_file_path = str(Path(source_folder) / file_name)
 
-# --- STEP 1: FILE EXISTENCE CHECK ---
+
+# Check file landing before spinning up heavy reads
 if not any(f.name == file_name for f in mssparkutils.fs.ls(source_folder)):
   raise FileNotFoundError(
       f"CRITICAL: Required landed file '{file_name}' not found in"
       f" '{source_folder}'."
   )
 
-# --- STEP 2: INGEST LANDED FILE ---
+# Read raw batch (permissive mode so bad rows don't instantly crash the load)
 df_raw = (
     spark.read.format("csv")
     .option("header", "true")
@@ -94,12 +105,13 @@ df_raw = (
     .load(source_file_path)
 )
 
-# --- STEP 3: DATA QUALITY CHECKS ---
+# Basic data sanity checks
 total_count = df_raw.count()
 
 if total_count == 0:
   raise Exception(f"DATA QUALITY FAILURE: {file_name} is empty. Load aborted.")
 
+# Fail the run if essential payload fields are missing too often
 null_amount_count = df_raw.filter(
     col("amount").isNull() | col("type").isNull()
 ).count()
@@ -116,7 +128,7 @@ else:
           f" {total_count} rows."
           )
 
-# --- STEP 4: METADATA ENRICHMENT ---
+# Append audit metadata & governance tags
 df_bronze = (
     df_raw.withColumn("ingestion_timestamp", current_timestamp())
     .withColumn("source_file", input_file_name())
@@ -125,7 +137,7 @@ df_bronze = (
     .withColumn("job_run_id", lit(run_id))
 )
 
-# --- STEP 5: WRITE TO BRONZE DELTA TABLE ---
+# Overwrite target Bronze table partitioned by transaction type
 spark.sql("CREATE SCHEMA IF NOT EXISTS bronze")
 (
     df_bronze.write.format("delta")
@@ -137,7 +149,6 @@ spark.sql("CREATE SCHEMA IF NOT EXISTS bronze")
 
 print(f"Table '{table_name}' successfully written.")
 
-# --- STEP 6: DATA GOVERNANCE & COMMENTS ---
 spark.sql(
     f"ALTER TABLE {table_name} ALTER COLUMN nameOrig COMMENT 'PII: Customer"
     " Name'"
@@ -147,7 +158,7 @@ spark.sql(
     " Name'"
 )
 
-# --- STEP 7: OPTIMIZE & VACUUM ---
+# Delta housekeeping (compact small files & purge data older than 7 days)
 print("Starting Table Compaction & Vacuum...")
 spark.sql(f"OPTIMIZE {table_name}")
 

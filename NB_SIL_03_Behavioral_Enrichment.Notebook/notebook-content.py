@@ -22,6 +22,7 @@
 
 # CELL ********************
 
+# Run dependency notebook to compute balance discrepancies and produce `v_audited_transactions` view
 %run ./NB_SIL_02_Data_Integrity_Audit
 
 # METADATA ********************

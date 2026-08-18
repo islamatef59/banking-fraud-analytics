@@ -22,6 +22,7 @@
 
 # CELL ********************
 
+# Run dependency notebook to build cleaned & masked Silver view (v_security_cleaned)
 %run ./NB_SIL_01_Transformation_Security_and_Masking
 
 
@@ -37,11 +38,11 @@
 from pyspark.sql import functions as F
 
 # 1. FETCH DATA FROM PREVIOUS STEP
-# We use the view you registered in Notebook 01
+# Load cleaned Silver view generated in preceding transformation step
 df_security = spark.table("v_security_cleaned")
 
 # 2. CALCULATE MATHEMATICAL DISCREPANCIES (Gaps)
-# We measure how far the actual balance is from the 'expected' balance
+# Calculate absolute balance variances across origin and destination accounts
 df_with_gaps = df_security.withColumn(
     "origin_gap", 
     F.abs((F.col("oldbalanceOrg") - F.col("amount")) - F.col("newbalanceOrig"))
@@ -50,7 +51,7 @@ df_with_gaps = df_security.withColumn(
     F.abs((F.col("oldbalanceDest") + F.col("amount")) - F.col("newbalanceDest"))
 )
 # 3. APPLY THEORETICAL DATA QUALITY CATEGORIES
-# We classify rows based on the 'Materiality' of the error
+# Categorize balance discrepancies, flag untracked endpoints, and assign risk tiers
 df_audited = df_with_gaps.withColumn(
     "quality_tier",
     F.when(F.col("origin_gap") < 0.01, "A_PERFECT_LEDGER")        # Math is perfect
@@ -74,7 +75,7 @@ df_audited = df_with_gaps.withColumn(
 )
 
 # 4. GENERATE THE AUDIT SUMMARY TABLE
-# This is what you would put in your final project presentation
+# Aggregate quality metrics across tiers and validate critical key null rates
 audit_report = df_audited.groupBy("quality_tier").agg(
     F.count("*").alias("record_count"),
     F.avg("amount").alias("average_transfer_val"),
@@ -88,10 +89,8 @@ dq_summary = df_audited.select([
 print("Data Quality Null Ratio Audit:")
 dq_summary.show()
 
-# 5. EXECUTE AND DISPLAY
+# Register audited DataFrame as temp view for Gold aggregation stage
 print("--- Data Integrity And Audit are applied ---")
-
-# REGISTER VIEW FOR NOTEBOOK 03
 df_audited.createOrReplaceTempView("v_audited_transactions")
 
 # METADATA ********************

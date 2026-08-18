@@ -22,6 +22,7 @@
 
 # CELL ********************
 
+# Run dependency notebook to compute account velocity metrics, z-scores, and customer risk profiling
 %run ./NB_SIL_03_Behavioral_Enrichment
 
 # METADATA ********************
@@ -34,10 +35,10 @@
 # CELL ********************
 
 import pyspark.sql.functions as F
-# Pull from your silver table
+# Load cleaned and enriched Silver transactions table
 df_silver = spark.table("silver.silver_transactions")
 
-# Apply enrichment and filtering
+# Extract 1-indexed day of week from step count and filter statistical outliers / null z-scores
 df_silver = df_silver.withColumn(
     "day_of_week", F.floor((F.col("step") - 1) / 24) % 7 + 1
 ).filter(
@@ -56,9 +57,10 @@ df_silver = df_silver.withColumn(
 #constraints
 import pyspark.sql.functions as F
 
+# Ensure target Gold catalog schema exists
 spark.sql("CREATE SCHEMA IF NOT EXISTS gold")
-# 1. Define your Integrity Constraints
-# We create a filter that MUST be true for the data to be 'Gold'
+
+# Define mandatory strict data quality conditions for Gold layer promotio
 integrity_filter = (
     (F.col("transaction_sk").isNotNull()) & 
     (F.col("amount") > 0) & 
@@ -66,11 +68,11 @@ integrity_filter = (
 )
 
 # 2. Separate 'Gold' Data from 'Trash' (Quarantine)
+# Route valid records to processing stream and route non-compliant records to quarantine
 df_silver_filterd = df_silver.filter(integrity_filter)
-
 df_quarantine = df_silver.filter(~integrity_filter)
 
-# 3. Add a reason for why it was quarantined (Optional but Advanced)
+# Tag specific data quality violation reason for quarantine lineage and debugging
 df_quarantine = df_quarantine.withColumn("quarantine_reason", 
     F.when(F.col("transaction_sk").isNull(), "Missing Surrogate Key")
      .when(F.col("amount") <= 0, "Negative or Zero Amount")
@@ -78,10 +80,11 @@ df_quarantine = df_quarantine.withColumn("quarantine_reason",
      .otherwise("Other Integrity Failure")
 )
 
-# 5. Save the Quarantine for Audit
+# Persist non-compliant records to quarantine table for compliance audit tracking
 df_quarantine.write.format("delta").mode("append").saveAsTable("gold.quarantine_integrity_failures")
 
 # 1. Apply Logical Financial Flags
+# Evaluate business logic anomalies (balance spikes post-transfer, out-of-bounds simulation steps)
 df_silver_filterd =( 
     df_silver_filterd.withColumn(
     "has_logical_error",
@@ -95,8 +98,7 @@ df_silver_filterd =(
         1 # Error found
     ).otherwise(0)
 )
-# 2. Add Specific Audit Notes (Crucial for Forensic Investigators)
-
+# Generate concatenated audit trace notes for downstream compliance inspection
     .withColumn("audit_note",
         F.concat_ws(" | ", 
         F.when((F.col("type") == "TRANSFER") & (F.col("newbalanceOrig") > F.col("oldbalanceOrg")), 
@@ -119,8 +121,7 @@ df_silver_filterd =(
 
 df_silver_updates= (
     df_silver
-    # 1. Generate primary key for the transaction itself (MD5 on unique combo)
-    # If you have a natural transaction ID, use F.md5(F.col("transaction_id"))
+    #  Generate primary key for the transaction itself (MD5 on unique combo)
     .withColumn(
         "transaction_sk",
         F.md5(
@@ -133,11 +134,11 @@ df_silver_updates= (
             )
         ),
     )
-    # 2. Generate MD5 surrogate key for dim_txn_type
+    #  Generate MD5 surrogate key for dim_txn_type
     .withColumn("txn_type_sk", F.md5(F.col("type")))
-    # 3. Generate MD5 surrogate key for dim_date
+    #  Generate MD5 surrogate key for dim_date
     .withColumn("step_sk", F.md5(F.col("step").cast("string")))
-    # 4. Generate account surrogate key & timestamp for SCD2
+    # Establish dynamic account surrogate keys and effective start dates for SCD Type 2 dimension tracking
     .withColumn("start_date", F.current_timestamp())
     .withColumn(
         "account_sk",
@@ -281,7 +282,6 @@ fact_transactions = df_silver_filterd.select(
 spark.sql("CREATE DATABASE IF NOT EXISTS gold")
 
 # 2. Save Dimension: Accounts
-# We use 'overwrite' so that if we re-run the logic, it refreshes the attributes
 dim_account.write.format("delta") \
     .mode("overwrite") \
     .option("overwriteSchema", "true") \
@@ -298,7 +298,6 @@ dim_date.write.format("delta") \
     .saveAsTable("gold.dim_date")
 
 # 5. Save the Fact Table (The Big One)
-# We use 'append' or 'overwrite' depending on your pipeline needs
 fact_transactions.write.format("delta") \
     .mode("overwrite") \
     .partitionBy("day_of_week") \
@@ -322,8 +321,6 @@ print("Gold Layer Star Schema successfully deployed and optimized.")
 import pyspark.sql.functions as F
 
 # 1. Apply Sanity Filters
-# - We DROP rows with impossible Z-scores (they indicate math failure)
-# - We WARN/FLAG rows with Risk Scores outside the 0-100 range
 df_gold_sanitized = fact_transactions.withColumn(
     "is_mathematically_sane",
     F.when(
@@ -411,7 +408,6 @@ from delta.tables import *
 
 
 # 1. Create a starting point for the dimension
-# We add a default row so the table exists and has a Delta format
 initial_data = [("CASH_OUT", "Withdrawal of cash"), ("PAYMENT", "Standard payment")]
 schema = "type STRING, description STRING, last_updated TIMESTAMP"
 
@@ -475,7 +471,6 @@ new_account_states = df_silver \
     )
 
 # 2. Stage updates to determine which existing active rows actually CHANGED
-# We join target to find records requiring an expiration + new insertion
 staged_updates = new_account_states.alias("updates") \
     .join(
         targetTable.toDF().filter("is_current = true").alias("target"),
@@ -550,7 +545,6 @@ def generate_dim_time_step(start_date="2025-01-01", total_steps=744):
     df = spark.range(1, total_steps + 1).withColumnRenamed("id", "step")
     
     # 2. Calculate the Timestamp based on the step
-    # We add (step - 1) hours to our start date
     df = df.withColumn("timestamp", F.from_unixtime(
         F.unix_timestamp(F.lit(start_date)) + (F.col("step") - 1) * 3600
     ).cast("timestamp"))
@@ -634,7 +628,6 @@ ml_feature_table = df_silver_filterd.select(
 ).drop("type_risk_level")
 
 # 2. Null Imputation (Filling the gaps)
-# We fill ratios with 0 and spike ratios with 1 (meaning 'normal')
 ml_feature_table = ml_feature_table.fillna({
     "z_score": 0.0,
     "behavioral_spike_ratio": 1.0,
@@ -678,7 +671,6 @@ dim_acc_df = spark.read.table("gold.dim_account")
 orphans = fact_df.join(dim_acc_df, "nameOrig_hashed", "left_anti").count()
 
 # 4. CALCULATION (Using Python's built-in abs)
-# We use __builtins__.abs because 'abs' is often overwritten by pyspark.sql.functions
 amount_diff = __builtins__.abs(silver_sum - gold_sum)
 
 # 5. PRINT QUALITY REPORT
