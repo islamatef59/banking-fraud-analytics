@@ -22,7 +22,6 @@
 
 # CELL ********************
 
-# Run dependency notebook to build cleaned & masked Silver view (v_security_cleaned)
 %run ./NB_SIL_01_Transformation_Security_and_Masking
 
 

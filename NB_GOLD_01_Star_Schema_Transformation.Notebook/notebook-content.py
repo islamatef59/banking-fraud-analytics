@@ -22,7 +22,6 @@
 
 # CELL ********************
 
-# Run dependency notebook to compute account velocity metrics, z-scores, and customer risk profiling
 %run ./NB_SIL_03_Behavioral_Enrichment
 
 # METADATA ********************
