@@ -1,0 +1,50 @@
+Markdown
+##  Performance Optimizations & Trade-offs
+
+### Refactoring Global Window Aggregations to Prevent Data Skew
+
+During pipeline development, global population metrics (mean and standard deviation per transaction type) were refactored to eliminate **Data Skew** and **Executor Out-Of-Memory (OOM)** errors.
+
+####   Initial Approach: Low-Cardinality Window Partitioning
+```python
+# Anti-Pattern: Forces millions of rows onto single worker nodes
+window_type = Window.partitionBy("type")
+
+df_silver = df_audited \
+    .withColumn("avg_amount", F.avg("amount").over(window_type)) \
+    .withColumn("stddev_amount", F.stddev("amount").over(window_type))
+The Issue: type has low cardinality (only 5 distinct values: TRANSFER, CASH_OUT, etc.). Partitioning 100M+ rows across 5 keys forces heavy network shuffles (wide transformations) and overloads single executor nodes, causing severe disk spilling and OOM crashes.
+
+Optimized Approach: Pre-Aggregation + Broadcast Join
+Python
+# Step 1: Compute lightweight aggregate statistics globally
+type_stats = df_audited.groupBy("type").agg(
+    F.avg("amount").alias("avg_amount"),
+    F.stddev("amount").alias("stddev_amount")
+)
+
+# Step 2: Broadcast tiny aggregate table (5 rows) to all worker nodes
+df_prepared = df_audited.join(F.broadcast(type_stats), on="type", how="left")
+
+# Step 3: Compute downstream z-scores locally without shuffling raw data
+df_silver = df_prepared.withColumn(
+    "z_score", (F.col("amount") - F.col("avg_amount")) / F.col("stddev_amount")
+)
+
+Partitioning Strategy Rules Applied
+Low-Cardinality Keys (type): Handled via Pre-Aggregation + Broadcast Joins to avoid node overload.
+
+High-Cardinality Keys (nameOrig_hashed): Handled via Native Window Functions (account_history). Because user accounts average few transactions, partitions remain tiny and distribute evenly.
+
+Rolling Frames: Enforced explicit frame bounds (rangeBetween(-23, 0) and rowsBetween(-10, -1)) to cap memory usage during rolling window calculations.
+
+
+<ElicitationsGroup message="Next steps to complete your GitHub repository:">
+
+  <Elicitation label="Draft unit tests for the Silver layer using Pytest" query="Write a pytest test suite to verify the mathematical integrity and window transformation logic of the Silver layer PySpark script."/>
+
+  <Elicitation label="Generate Delta Lake storage and partitioning strategy" query="Explain how to optimize writing df_silver to a Delta table, including partitioning strategy, Z-Ordering, and Liquid Clustering."/>
+
+  <Elicitation label="Prepare technical interview Q&amp;A on PySpark execution plans" query="Generate top technical interview questions and answers explaining DAG execution plans, data skew, and window functions based on this pipeline."/>
+
+</ElicitationsGroup>
