@@ -260,7 +260,7 @@
             "storeSettings": {
               "type": "AzureBlobStorageReadSettings",
               "recursive": true,
-              "deleteFilesAfterCompletion": true
+              "deleteFilesAfterCompletion": false
             },
             "datasetSettings": {
               "type": "Binary",

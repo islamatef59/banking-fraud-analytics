@@ -199,14 +199,21 @@ import pyspark.sql.functions as F
 # =========================================================================
 df_audited = spark.read.table("v_audited_transactions")
 
+
+
+# Computing this separately prevents pulling all rows of a single type onto one node.
+type_stats = df_audited.groupBy("type").agg(
+    F.avg("amount").alias("avg_amount"),
+    F.stddev("amount").alias("stddev_amount")
+)
+
+# Join the aggregated metrics back to df_audited using a broadcast join
+df_prepared = df_audited.join(F.broadcast(type_stats), on="type", how="left")
 # =========================================================================
 # 2. DEFINE ANALYTICAL WINDOWS
 # =========================================================================
 # User-Specific History (by Step)
 account_history = Window.partitionBy("nameOrig_hashed").orderBy("step")
-
-# Global Context by Transaction Type
-window_type = Window.partitionBy("type")
 
 # Range-based Velocity (Last 24 hours)
 velocity_window = (
@@ -239,7 +246,7 @@ first_action_window = Window.partitionBy("nameOrig_hashed").orderBy("step")
 # 3. DATA TRANSFORMATIONS (SILVER LAYER)
 # =========================================================================
 df_silver = (
-    df_audited
+    df_prepared
     # --- Category & Risk Labeling ---
     .withColumn("temporal_risk_bucket",
         F.when((F.col("step") % 24 <= 4) | (F.col("step") % 24 >= 23), "Late Night")
@@ -272,11 +279,9 @@ df_silver = (
     .withColumn("hours_since_last_txn", F.col("step") - F.col("prev_step"))
     .withColumn("time_since_last_txn", F.col("step") - F.col("prev_step")) # Keep both as per your request
     .withColumn("txns_last_24h", F.count("amount").over(velocity_window))
-    .withColumn("days_since_last_txn", F.when(F.col("txns_last_24h") > 3, "High Velocity").otherwise("Normal"))
+    .withColumn("txn_velocity_level", F.when(F.col("txns_last_24h") > 3, "High Velocity").otherwise("Normal"))
 
     # --- Statistical & Historical Metrics ---
-    .withColumn("avg_amount", F.avg("amount").over(window_type)) 
-    .withColumn("stddev_amount", F.stddev("amount").over(window_type))
     .withColumn("running_total_outflow", F.sum("amount").over(account_history))
     .withColumn("z_score", (F.col("amount") - F.col("avg_amount")) / F.col("stddev_amount"))
     .withColumn("drainage_ratio", F.round((F.col("amount") / F.col("running_total_outflow")) * 100, 2))
@@ -348,9 +353,9 @@ spark.sql(f"CREATE SCHEMA IF NOT EXISTS {target_schema}")
 spark.sql(f"USE {target_schema}")
 
 # --- 2. ENSURE SURROGATE KEY EXISTS ---
-# The Merge needs a unique ID. If 'transaction_sk' isn't in your df_silver yet, we create it.
+# The Merge needs a unique ID. If 'transaction_sk' isn't in  df_silver yet,  create it.
 if "transaction_sk" not in df_silver.columns:
-    df_silver = df_silver.withColumn("transaction_sk", F.sha2(F.concat_ws("||", "origin_hash", "step", "amount", "txn_type"), 256))
+    df_silver = df_silver.withColumn("transaction_sk", F.xxhash64("origin_hash", "step", "amount", "txn_type"))
 
 # --- 3. UPSERT LOGIC WITH ERROR HANDLING ---
 try:

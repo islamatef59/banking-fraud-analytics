@@ -120,28 +120,20 @@ df_silver_filterd =(
 
 df_silver_updates= (
     df_silver
-    #  Generate primary key for the transaction itself (MD5 on unique combo)
+    #  Generate primary key for the transaction itself 
     .withColumn(
         "transaction_sk",
-        F.md5(
-            F.concat_ws(
-                "||",
-                F.col("nameOrig_hashed"),
-                F.col("step").cast("string"),
-                F.col("amount").cast("string"),
-                F.col("type"),
-            )
-        ),
+       F.xxhash64("nameOrig_hashed", "step", "amount", "type"),
     )
-    #  Generate MD5 surrogate key for dim_txn_type
-    .withColumn("txn_type_sk", F.md5(F.col("type")))
-    #  Generate MD5 surrogate key for dim_date
-    .withColumn("step_sk", F.md5(F.col("step").cast("string")))
+    #  Generate xxhash64 surrogate key for dim_txn_type
+    .withColumn("txn_type_sk", F.xxhash64("type"))
+    #  Generate xxhash64 surrogate key for dim_date
+    .withColumn("step_sk", F.xxhash64("step").cast("string"))
     # Establish dynamic account surrogate keys and effective start dates for SCD Type 2 dimension tracking
     .withColumn("start_date", F.current_timestamp())
     .withColumn(
         "account_sk",
-        F.md5(
+        F.xxhash64(
             F.concat_ws(
                 "||",
                 F.col("nameOrig_hashed"),
@@ -168,11 +160,12 @@ dim_account = (
         "account_audit_status",
     )
     .distinct()
-    # Generates a stable, deterministic key based directly on the account ID
-    .withColumn("account_sk",F.md5(F.concat_ws("||", F.col("nameOrig_hashed"), F.col("start_date").cast("string")), 256))
     .withColumn("is_current", F.lit(True))
     .withColumn("start_date", F.current_timestamp())
     .withColumn("end_date", F.lit(None).cast("timestamp"))
+    # Generates a stable, deterministic key based directly on the account ID
+    .withColumn("account_sk",F.xxhash64("nameOrig_hashed","start_date"))
+
     .select(
         "account_sk",
         "nameOrig_hashed",
@@ -194,18 +187,14 @@ dim_txn_type = (
     # Combine attributes and compute MD5 hash for txn_type_sk
     .withColumn(
         "txn_type_sk",
-        F.md5(
-            F.concat_ws(
-                "||",
-                F.coalesce(F.col("type_risk_level"), F.lit("")),
-                F.coalesce(F.col("txn_category_risk"), F.lit("")),
-                F.coalesce(F.col("fund_direction"), F.lit("")),
+        F.xxhash64("type","type_risk_level","txn_category_risk", "fund_direction")
             )
-        ),
-    )
+        
+    
     # Reorder columns so the surrogate key is first
     .select(
         "txn_type_sk",
+        "type",
         "type_risk_level",
         "txn_category_risk",
         "fund_direction",
@@ -220,7 +209,7 @@ dim_date = (
     )
     .distinct()
     # Generate MD5 surrogate key from step
-    .withColumn("step_sk", F.md5(F.col("step").cast("string")))
+    .withColumn("step_sk", F.xxhash64("step")
     # Reorder columns so the surrogate key is first
     .select(
         "step_sk",
@@ -230,19 +219,10 @@ dim_date = (
         "temporal_risk_bucket",
     )
 )
-
+)
 fact_transactions = df_silver_filterd.select(
     # Foreign Keys
-    "transaction_sk",
-     F.md5(
-            F.concat_ws(
-                "||",
-                F.col("nameOrig_hashed"),
-                F.col("step").cast("string"),
-                F.col("amount").cast("string"),
-                F.col("type"),
-            )
-        ),
+    "transaction_sk",F.xxhash64("nameOrig_hashed","step","amount"."string"),
     "nameOrig_hashed", 
     "account_sk", 
     "txn_type_sk",
@@ -351,7 +331,7 @@ df_gold_final.write.format("delta") \
 # This helps the engineering team find bugs in the Silver math code
 df_math_errors.write.format("delta") \
     .mode("append") \
-    .option("overwriteSchema", "true") \
+    .option("overwriteschema", "true") \
     .saveAsTable("gold.audit_math_failures")
 
 # METADATA ********************

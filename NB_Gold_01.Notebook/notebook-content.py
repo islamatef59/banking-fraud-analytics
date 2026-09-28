@@ -31,14 +31,14 @@ def generate_dim_time_step(start_date="2025-01-01", total_steps=744):
     # 2. Calculate Timestamp dynamically (Add (step - 1) hours as seconds)
     # 3600 seconds = 1 hour
     df = df.withColumn(
-        "timestamp", 
-        (F.to_timestamp(F.lit(start_date)) + ((F.col("step") - 1) * 3600).cast("interval second"))
-    )
+    "timestamp", 
+    F.to_timestamp(F.lit(start_date)) + (F.col("step") - 1) * F.expr("INTERVAL 1 HOUR")
+)
     
     # 3. Extract attributes and generate Surrogate Key
     dim_date = df.select(
-        # MD5 Surrogate Key matching fact_transactions
-        F.md5(F.col("step").cast("string")).alias("step_sk"),
+        # xxhash64 Surrogate Key matching fact_transactions
+        F.xxhash64("step").alias("step_sk"),  
         
         # Natural Key
         F.col("step").cast("int"),
@@ -87,31 +87,21 @@ df_silver_enriched = (
     df_silver
     .withColumn("day_of_week", F.floor((F.col("step") - 1) / 24) % 7 + 1)
     .withColumn("start_date", F.current_timestamp())
-    # Generate Primary Key (MD5)
+    # Generate Primary Key 
     .withColumn(
         "transaction_sk",
-        F.md5(
-            F.concat_ws(
-                "||",
-                F.col("nameOrig_hashed"),
-                F.col("step").cast("string"),
-                F.col("amount").cast("string"),
-                F.col("type")
-            )
-        )
+        F.xxhash64("nameOrig_hashed","step","amount","type")
+            
+        
     )
     # Generate Dimension Surrogate Keys
-    .withColumn("txn_type_sk", F.md5(F.col("type")))
-    .withColumn("step_sk", F.md5(F.col("step").cast("string")))
+    .withColumn("txn_type_sk", F.xxhash64("type"))
+    .withColumn("step_sk", F.xxhash64("step"))
     .withColumn(
         "account_sk",
-        F.md5(
-            F.concat_ws(
-                "||",
-                F.col("nameOrig_hashed"),
-                F.col("start_date").cast("string")
-            )
-        )
+        F.xxhash64("nameOrig_hashed","start_date")
+            
+        
     )
 )
 
@@ -147,13 +137,15 @@ df_quarantine = df_quarantine.withColumn(
      .when(F.col("nameOrig_hashed").isNull(), "Missing Originator Identity")
      .otherwise("Other Integrity Failure")
 )
-
-# 4. Save Quarantine for Audit
-df_quarantine.write.format("delta").mode("append").option("mergeSchema", "true").saveAsTable("gold.quarantine_integrity_failures")
-
+df_quarantine = df_quarantine.withColumn(
+    "transaction_sk", F.col("transaction_sk").cast("string")
+)
 # 5. Apply Logical Financial Flags & Forensic Audit Notes
 df_silver_audited = (
     df_silver_filtered
+    .withColumn(
+    "transaction_sk", F.col("transaction_sk").cast("string")
+     )
     .withColumn(
         "has_logical_error",
         F.when(
@@ -172,6 +164,7 @@ df_silver_audited = (
                    "WARN: Step value outside simulation bounds")
         )
     )
+    
 )
 
 # METADATA ********************
@@ -206,8 +199,8 @@ df_math_errors = df_gold_sanitized.filter(F.col("is_mathematically_sane") == 0)
 
 # 3. Audit Math Errors for Engineering Review
 df_math_errors.write.format("delta") \
-    .mode("append") \
-    .option("mergeSchema", "true") \
+    .mode("overwrite") \
+    .option("overwriteschema", "true") \
     .saveAsTable("gold.audit_math_failures")
 
 # METADATA ********************
@@ -348,12 +341,12 @@ from delta.tables import DeltaTable
 
 # Access the Gold Fact Table
 factTable = DeltaTable.forName(spark, "gold.fact_transactions")
-
+spark.conf.set("spark.databricks.delta.schema.autoMerge.enabled", "true") 
 # Execute Delta MERGE with Partition Pruning
 (
     factTable.alias("target")
     .merge(
-        source=fact_transactions.alias("updates"),
+        source=df_silver_enriched.alias("updates"),
         # Condition includes partition key (day_of_week) for max query pruning speed
         condition="target.transaction_sk = updates.transaction_sk AND target.day_of_week = updates.day_of_week"
     )
@@ -499,7 +492,7 @@ new_records_to_insert = (
     staged_updates
     .filter("(attr_changed = true) OR (is_existing_account = false)")
     .select(
-        F.md5(F.concat_ws("||", F.col("nameOrig_hashed"), F.current_timestamp())).alias("account_sk"),
+        F.xxhash64(F.col("nameOrig_hashed"), F.current_timestamp().cast("string")).alias("account_sk"),
         F.col("nameOrig_hashed"),
         F.col("customer_segment"),
         F.col("account_activity"),
@@ -539,7 +532,7 @@ import pyspark.sql.functions as F
 # 1. Ensure Table Exists with correct schema using SQL DDL
 spark.sql("""
 CREATE TABLE IF NOT EXISTS gold.dim_transaction_type (
-    txn_type_sk STRING,
+    txn_type_sk BIGINT,
     type_risk_level STRING,
     txn_category_risk STRING,
     fund_direction STRING,
@@ -547,7 +540,6 @@ CREATE TABLE IF NOT EXISTS gold.dim_transaction_type (
 )
 USING DELTA
 """)
-spark.sql("ALTER TABLE gold.dim_transaction_type ADD COLUMN last_updated TIMESTAMP;")
 # 2. Extract distinct transaction type combinations from Silver
 new_txn_types = (
     df_silver.select(
@@ -556,17 +548,12 @@ new_txn_types = (
         "fund_direction"
     )
     .distinct()
-    # Compute the deterministic MD5 Surrogate Key & append current timestamp upfront
+    # Compute the deterministic xxhash64 Surrogate Key & append current timestamp upfront
     .withColumn(
         "txn_type_sk",
-        F.md5(
-            F.concat_ws(
-                "||",
-                F.coalesce(F.col("type_risk_level"), F.lit("")),
-                F.coalesce(F.col("txn_category_risk"), F.lit("")),
-                F.coalesce(F.col("fund_direction"), F.lit(""))
-            )
-        )
+        F.xxhash64("type_risk_level","txn_category_risk","fund_direction")
+            
+        
     )
     .withColumn("last_updated", F.current_timestamp())
 )
@@ -593,62 +580,6 @@ targetTable = DeltaTable.forName(spark, "gold.dim_transaction_type")
 )
 
 print("gold.dim_transaction_type updated successfully.")
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
-import pyspark.sql.functions as F
-
-def generate_dim_time_step(start_date="2025-01-01", total_steps=744):
-    # 1. Generate a sequence for every HOUR (step)
-    df = spark.range(1, total_steps + 1).withColumnRenamed("id", "step")
-    
-    # 2. Calculate the Timestamp based on the step
-    df = df.withColumn(
-        "timestamp", 
-        F.from_unixtime(
-            F.unix_timestamp(F.lit(start_date)) + (F.col("step") - 1) * 3600
-        ).cast("timestamp")
-    )
-    
-    # 3. Extract attributes and generate Surrogate Key
-    dim_date = df.select(
-        # Generate the MD5 surrogate key to match fact_transactions
-        F.md5(F.col("step").cast("string")).alias("step_sk"),
-        
-        # Natural Key
-        F.col("step").cast("int"),
-        
-        # Calendar Attributes
-        F.to_date("timestamp").alias("calendar_date"),
-        F.date_format("timestamp", "EEEE").alias("day_name"),
-        F.dayofweek("timestamp").cast("bigint").alias("day_of_week"),
-        F.hour("timestamp").alias("hour_of_day"),
-        
-        # Temporal Risk Logic
-        F.when((F.hour("timestamp") >= 0) & (F.hour("timestamp") <= 6), "High Risk")
-         .when((F.hour("timestamp") >= 22), "High Risk")
-         .otherwise("Low Risk").alias("temporal_risk_bucket")
-    )
-    
-    return dim_date
-
-# 4. Generate the Dimension
-df_date_final = generate_dim_time_step()
-
-# 5. Save to Gold
-df_date_final.write.format("delta") \
-    .mode("overwrite") \
-    .option("overwriteSchema", "true") \
-    .saveAsTable("gold.dim_date")
-
-print("Time Dimension Table successfully generated with step_sk.")
 
 # METADATA ********************
 

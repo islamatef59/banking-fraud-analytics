@@ -62,7 +62,7 @@ def transform_to_silver(df):
         # Mask customer IDs and generate surrogate key for transaction granularity
         F.sha2(F.concat(F.upper(F.trim(F.col("nameOrig"))), F.lit(SALT)), 256).alias("nameOrig_hashed"),
         F.sha2(F.concat(F.upper(F.trim(F.col("nameDest"))), F.lit(SALT)), 256).alias("nameDest_hashed"),
-        F.sha2(F.concat_ws("&",F.col("step").cast("string"),F.col("nameOrig_hashed"),F.col("amount").cast("string")),256).alias("transaction_sk"),
+        F.xxhash64("step", "nameOrig_hashed", "amount").alias("transaction_sk"),
         F.col("nameDest").startswith("M").alias("is_merchant_dest"),
         
         # Rule-based fraud & risk categorization
@@ -111,7 +111,7 @@ def advanced_silver_transform(df):
 df_security = transform_to_silver(df_bronze)
 df_security= advanced_silver_transform(df_security)
 # Optional: Drop original PII columns if masking is successful
-df_security = df_security.drop("nameOrig", "newDest")
+df_security = df_security.drop("nameOrig", "nameDest")
 
 # Reorder schema to place transaction primary key at column index 0
 target_col = "transaction_sk"
