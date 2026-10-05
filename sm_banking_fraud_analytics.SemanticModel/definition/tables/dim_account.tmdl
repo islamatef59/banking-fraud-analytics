@@ -1,0 +1,87 @@
+table dim_account
+	lineageTag: 26381a47-8f9a-404a-b7cf-44d8bedb3268
+	sourceLineageTag: [gold].[dim_account]
+
+	column account_sk
+		dataType: int64
+		formatString: 0
+		lineageTag: a055cfb3-808d-4026-bb3c-618dff1c52dc
+		sourceLineageTag: account_sk
+		summarizeBy: none
+		sourceColumn: account_sk
+
+		annotation SummarizationSetBy = Automatic
+
+	column nameOrig_hashed
+		dataType: string
+		lineageTag: 02a43f0c-9e85-4e7e-912b-eb09d1daf2e5
+		sourceLineageTag: nameOrig_hashed
+		summarizeBy: none
+		sourceColumn: nameOrig_hashed
+
+		annotation SummarizationSetBy = Automatic
+
+	column customer_segment
+		dataType: string
+		lineageTag: faab4443-1f2e-4f9d-b66a-a9edb6d9d642
+		sourceLineageTag: customer_segment
+		summarizeBy: none
+		sourceColumn: customer_segment
+
+		annotation SummarizationSetBy = Automatic
+
+	column account_activity
+		dataType: string
+		lineageTag: 1fac45cc-6fe2-421a-9a1e-8b94cbf8c8bd
+		sourceLineageTag: account_activity
+		summarizeBy: none
+		sourceColumn: account_activity
+
+		annotation SummarizationSetBy = Automatic
+
+	column account_audit_status
+		dataType: string
+		lineageTag: 4625ee74-d1fc-4699-8826-f5f1d69a2f99
+		sourceLineageTag: account_audit_status
+		summarizeBy: none
+		sourceColumn: account_audit_status
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_current
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 2b20958f-1242-4331-adde-b86961fe88a2
+		sourceLineageTag: is_current
+		summarizeBy: none
+		sourceColumn: is_current
+
+		annotation SummarizationSetBy = Automatic
+
+	column start_date
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 1e510601-89ff-4420-a159-8f4d43b16b2e
+		sourceLineageTag: start_date
+		summarizeBy: none
+		sourceColumn: start_date
+
+		annotation SummarizationSetBy = Automatic
+
+	column end_date
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 15573bab-3c6c-4fb8-802e-885b33f5be8c
+		sourceLineageTag: end_date
+		summarizeBy: none
+		sourceColumn: end_date
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_account = entity
+		mode: directLake
+		source
+			entityName: dim_account
+			schemaName: gold
+			expressionSource: 'DirectLake - lh_banking_transactions'
+

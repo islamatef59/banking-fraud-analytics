@@ -1,0 +1,12 @@
+relationship 8b6094eb-16f4-1583-7403-8c27453870ae
+	fromColumn: fact_transactions.step
+	toColumn: dim_date.step
+
+relationship 902e44c9-662d-5111-f74a-3f4fdea1c73b
+	fromColumn: dim_account.account_sk
+	toColumn: fact_transactions.account_sk
+
+relationship e3505f6f-bf59-5dc0-3b74-f5f9ab754237
+	fromColumn: fact_transactions.txn_type_sk
+	toColumn: dim_transaction_type.txn_type_sk
+

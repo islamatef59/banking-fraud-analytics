@@ -1,0 +1,11 @@
+expression 'DirectLake - lh_banking_transactions' =
+		let
+		    Source = AzureStorage.DataLake("https://onelake.dfs.fabric.microsoft.com/614d5d24-d74c-4eed-837f-98a82699d6dc/259b2f49-bfe7-4cd2-830c-eec555762d22", [HierarchicalNavigation=true])
+		in
+		    Source
+	lineageTag: dc983c0c-1beb-4eca-b191-9ebb0ad86421
+
+	annotation PBI_IncludeFutureArtifacts = False
+
+	annotation PBI_RemovedChildren = [{"remoteItemId":{"analysisServicesObject":{"sourceName":null,"sourceLineageTag":"[bronze].[bronze_transactions]"}},"objectType":"Table"},{"remoteItemId":{"analysisServicesObject":{"sourceName":null,"sourceLineageTag":"[gold].[quarantine_integrity_failures]"}},"objectType":"Table"},{"remoteItemId":{"analysisServicesObject":{"sourceName":null,"sourceLineageTag":"[gold].[fs_account_features]"}},"objectType":"Table"},{"remoteItemId":{"analysisServicesObject":{"sourceName":null,"sourceLineageTag":"[gold].[audit_math_failures]"}},"objectType":"Table"},{"remoteItemId":{"analysisServicesObject":{"sourceName":null,"sourceLineageTag":"[gold].[agg_daily_fraud]"}},"objectType":"Table"},{"remoteItemId":{"analysisServicesObject":{"sourceName":null,"sourceLineageTag":"[silver].[silver_transactions]"}},"objectType":"Table"}]
+

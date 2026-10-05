@@ -1,0 +1,79 @@
+table dim_date
+	lineageTag: c15ae23f-df2c-4fa1-a5c0-55c69c28f298
+	sourceLineageTag: [gold].[dim_date]
+
+	column step_sk
+		dataType: int64
+		formatString: 0
+		lineageTag: 7bc9f53e-7ff5-48cf-84cd-09b6b66c3f47
+		sourceLineageTag: step_sk
+		summarizeBy: none
+		sourceColumn: step_sk
+
+		annotation SummarizationSetBy = Automatic
+
+	column step
+		dataType: int64
+		formatString: 0
+		lineageTag: 4453dd36-8f5e-4ae8-b45f-2248d8186b9a
+		sourceLineageTag: step
+		summarizeBy: none
+		sourceColumn: step
+
+		annotation SummarizationSetBy = Automatic
+
+	column calendar_date
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 43be0daf-e50a-43cb-9249-e55ecb880b2b
+		sourceLineageTag: calendar_date
+		summarizeBy: none
+		sourceColumn: calendar_date
+
+		annotation SummarizationSetBy = Automatic
+
+	column day_name
+		dataType: string
+		lineageTag: 2c18d75d-56cc-4f7d-8838-e6041d77a006
+		sourceLineageTag: day_name
+		summarizeBy: none
+		sourceColumn: day_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column day_of_week
+		dataType: int64
+		formatString: 0
+		lineageTag: 3bf81e20-46f9-4431-8f7a-e0a7ef144696
+		sourceLineageTag: day_of_week
+		summarizeBy: none
+		sourceColumn: day_of_week
+
+		annotation SummarizationSetBy = Automatic
+
+	column hour_of_day
+		dataType: int64
+		formatString: 0
+		lineageTag: 94edf5b7-3cc2-4dec-b9af-50d4960d8c70
+		sourceLineageTag: hour_of_day
+		summarizeBy: none
+		sourceColumn: hour_of_day
+
+		annotation SummarizationSetBy = Automatic
+
+	column temporal_risk_bucket
+		dataType: string
+		lineageTag: b75b2a04-e28a-4056-9fba-df100a351c71
+		sourceLineageTag: temporal_risk_bucket
+		summarizeBy: none
+		sourceColumn: temporal_risk_bucket
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_date = entity
+		mode: directLake
+		source
+			entityName: dim_date
+			schemaName: gold
+			expressionSource: 'DirectLake - lh_banking_transactions'
+

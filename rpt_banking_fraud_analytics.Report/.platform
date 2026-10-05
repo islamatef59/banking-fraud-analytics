@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "rpt_banking_fraud_analytics"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "95d9b289-9720-8870-4599-0f5353de4167"
+  }
+}

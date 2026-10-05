@@ -1,0 +1,58 @@
+table dim_transaction_type
+	lineageTag: 5b52fdda-8686-4238-92ef-f013f1bf1c5b
+	sourceLineageTag: [gold].[dim_transaction_type]
+
+	column txn_type_sk
+		dataType: int64
+		formatString: 0
+		lineageTag: feded967-3e68-4680-8557-4600a49c8ce0
+		sourceLineageTag: txn_type_sk
+		summarizeBy: none
+		sourceColumn: txn_type_sk
+
+		annotation SummarizationSetBy = Automatic
+
+	column type_risk_level
+		dataType: string
+		lineageTag: db6dacfe-5f30-4828-ad2e-80d1efac4820
+		sourceLineageTag: type_risk_level
+		summarizeBy: none
+		sourceColumn: type_risk_level
+
+		annotation SummarizationSetBy = Automatic
+
+	column txn_category_risk
+		dataType: string
+		lineageTag: d687ec3b-5be3-4caa-a8d7-e0ab8d1d53ba
+		sourceLineageTag: txn_category_risk
+		summarizeBy: none
+		sourceColumn: txn_category_risk
+
+		annotation SummarizationSetBy = Automatic
+
+	column fund_direction
+		dataType: string
+		lineageTag: 7b046ecb-4d8d-47ed-ac3a-8f6c838712ff
+		sourceLineageTag: fund_direction
+		summarizeBy: none
+		sourceColumn: fund_direction
+
+		annotation SummarizationSetBy = Automatic
+
+	column last_updated
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 822ff5d4-1308-4de8-af3c-6c2f29b37cdd
+		sourceLineageTag: last_updated
+		summarizeBy: none
+		sourceColumn: last_updated
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_transaction_type = entity
+		mode: directLake
+		source
+			entityName: dim_transaction_type
+			schemaName: gold
+			expressionSource: 'DirectLake - lh_banking_transactions'
+

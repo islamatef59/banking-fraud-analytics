@@ -1,0 +1,820 @@
+table fact_transactions
+	lineageTag: 8e108986-c5e6-4ed7-a726-3c07ede1f443
+	sourceLineageTag: [gold].[fact_transactions]
+
+	measure 'Total Volume' = SUM(fact_transactions[amount])
+		lineageTag: 3d47689f-21e2-435d-b2d2-e93cd843e2ca
+
+		changedProperty = Name
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Fraud Volume' = ```
+			
+			CALCULATE(
+			    SUM(fact_transactions[amount]), 
+			    fact_transactions[isfraud] = TRUE()
+			)
+			```
+		formatString: 0
+		lineageTag: 550f1853-e613-45bd-908b-bcb5a429d9a2
+
+		changedProperty = Name
+
+	measure 'Fraud Count' = ```
+			
+			CALCULATE(
+			    COUNTROWS(fact_transactions), 
+			    fact_transactions[isfraud] = TRUE()
+			)
+			```
+		formatString: 0
+		lineageTag: d25407d8-0644-45c9-b8ed-0ddc915bc2bb
+
+		changedProperty = Name
+
+	measure 'Fraud Rate %' = DIVIDE([Total Fraud Volume], [Total Volume], 0)
+		lineageTag: 52b87199-9044-4c1f-852c-94d120a86685
+
+		changedProperty = Name
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'High Risk Txn Count' = ```
+			
+			CALCULATE(
+			    COUNTROWS(fact_transactions), 
+			    fact_transactions[type_risk_level] IN {"HIGH", "CRITICAL"}
+			)
+			```
+		formatString: 0
+		lineageTag: 977bd3a4-f065-4f15-adcf-b53729f6f8d4
+
+		changedProperty = Name
+
+	column transaction_sk
+		dataType: string
+		lineageTag: 88013db6-074f-4191-8600-7796624b0055
+		sourceLineageTag: transaction_sk
+		summarizeBy: none
+		sourceColumn: transaction_sk
+
+		annotation SummarizationSetBy = Automatic
+
+	column nameOrig_hashed
+		dataType: string
+		lineageTag: 3553e369-d5a0-456e-86d0-0886fdeee03d
+		sourceLineageTag: nameOrig_hashed
+		summarizeBy: none
+		sourceColumn: nameOrig_hashed
+
+		annotation SummarizationSetBy = Automatic
+
+	column account_sk
+		dataType: int64
+		formatString: 0
+		lineageTag: 9f8d184f-7330-4443-83cb-c458ae58a2f4
+		sourceLineageTag: account_sk
+		summarizeBy: none
+		sourceColumn: account_sk
+
+		annotation SummarizationSetBy = Automatic
+
+	column txn_type_sk
+		dataType: int64
+		formatString: 0
+		lineageTag: ce496b16-9ac2-4145-b822-83ff049662b1
+		sourceLineageTag: txn_type_sk
+		summarizeBy: none
+		sourceColumn: txn_type_sk
+
+		annotation SummarizationSetBy = Automatic
+
+	column step_sk
+		dataType: int64
+		formatString: 0
+		lineageTag: d2fa27a8-8a85-4c7b-9ae4-a3e5f0d6ecb8
+		sourceLineageTag: step_sk
+		summarizeBy: sum
+		sourceColumn: step_sk
+
+		annotation SummarizationSetBy = Automatic
+
+	column amount
+		dataType: double
+		lineageTag: 7bdcc1e5-c63e-4a28-b8e5-97f551000b07
+		sourceLineageTag: amount
+		summarizeBy: sum
+		sourceColumn: amount
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column oldbalanceOrg
+		dataType: double
+		lineageTag: 93cd9813-dc18-4707-b98d-a314c6a5b4c8
+		sourceLineageTag: oldbalanceOrg
+		summarizeBy: sum
+		sourceColumn: oldbalanceOrg
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column newbalanceOrig
+		dataType: double
+		lineageTag: 987f957e-58c0-4d8f-bea1-62fa271e9dd5
+		sourceLineageTag: newbalanceOrig
+		summarizeBy: sum
+		sourceColumn: newbalanceOrig
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column risk_score
+		dataType: string
+		lineageTag: c40f445d-bd22-4ac3-abf3-0407b8301a39
+		sourceLineageTag: risk_score
+		summarizeBy: none
+		sourceColumn: risk_score
+
+		annotation SummarizationSetBy = Automatic
+
+	column day_of_week
+		dataType: int64
+		formatString: 0
+		lineageTag: 59b6ffca-7bab-484c-9c0a-190d0567d38c
+		sourceLineageTag: day_of_week
+		summarizeBy: sum
+		sourceColumn: day_of_week
+
+		annotation SummarizationSetBy = Automatic
+
+	column balance_drain_ratio
+		dataType: double
+		lineageTag: 88771e14-fc42-42ce-8195-357c4aa7b6d7
+		sourceLineageTag: balance_drain_ratio
+		summarizeBy: sum
+		sourceColumn: balance_drain_ratio
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column z_score
+		dataType: double
+		lineageTag: cc70d8ee-66c8-4cd2-9951-85187415058e
+		sourceLineageTag: z_score
+		summarizeBy: sum
+		sourceColumn: z_score
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column isFraud
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 5f9b6896-e213-42f8-9ca4-37e80abd6f57
+		sourceLineageTag: isFraud
+		summarizeBy: none
+		sourceColumn: isFraud
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_behavioral_anomaly
+		dataType: int64
+		formatString: 0
+		lineageTag: 9c5fbcd3-bda4-40a0-9284-d7a3e4d51406
+		sourceLineageTag: is_behavioral_anomaly
+		summarizeBy: sum
+		sourceColumn: is_behavioral_anomaly
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_first_action
+		dataType: int64
+		formatString: 0
+		lineageTag: 80b7f9be-b119-47a5-b661-974c144d618a
+		sourceLineageTag: is_first_action
+		summarizeBy: sum
+		sourceColumn: is_first_action
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_round_number
+		dataType: int64
+		formatString: 0
+		lineageTag: 2d833b7f-d803-4cae-8afa-ef8efd748bc8
+		sourceLineageTag: is_round_number
+		summarizeBy: sum
+		sourceColumn: is_round_number
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_drain_event
+		dataType: int64
+		formatString: 0
+		lineageTag: be5cc2b8-6dd1-4adb-836e-ac77a58da9fe
+		sourceLineageTag: is_drain_event
+		summarizeBy: sum
+		sourceColumn: is_drain_event
+
+		annotation SummarizationSetBy = Automatic
+
+	column has_logical_error
+		dataType: int64
+		formatString: 0
+		lineageTag: 7d9ea177-43fe-4642-a980-4ed41c49aa4a
+		sourceLineageTag: has_logical_error
+		summarizeBy: sum
+		sourceColumn: has_logical_error
+
+		annotation SummarizationSetBy = Automatic
+
+	column audit_note
+		dataType: string
+		lineageTag: 427d49f7-5f4f-41dc-844c-82d739dc4042
+		sourceLineageTag: audit_note
+		summarizeBy: none
+		sourceColumn: audit_note
+
+		annotation SummarizationSetBy = Automatic
+
+	column step
+		dataType: int64
+		formatString: 0
+		lineageTag: 6313102c-c6c7-48fb-a2e9-2bdf1d889db5
+		sourceLineageTag: step
+		summarizeBy: none
+		sourceColumn: step
+
+		annotation SummarizationSetBy = Automatic
+
+	column type
+		dataType: string
+		lineageTag: 75277d2a-9b68-4716-bb6b-1acaddfd6269
+		sourceLineageTag: type
+		summarizeBy: none
+		sourceColumn: type
+
+		annotation SummarizationSetBy = Automatic
+
+	column status
+		dataType: string
+		lineageTag: 9a3cf333-0728-4c1d-a979-cce7d1cf8ed9
+		sourceLineageTag: status
+		summarizeBy: none
+		sourceColumn: status
+
+		annotation SummarizationSetBy = Automatic
+
+	column oldBalanceDest
+		dataType: double
+		lineageTag: 4262c433-8330-4fac-a627-2f4a03da024f
+		sourceLineageTag: oldBalanceDest
+		summarizeBy: sum
+		sourceColumn: oldBalanceDest
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column newBalanceDest
+		dataType: double
+		lineageTag: 27112c38-305f-49a7-b29e-b8fccc4cab7c
+		sourceLineageTag: newBalanceDest
+		summarizeBy: sum
+		sourceColumn: newBalanceDest
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column nameDest_hashed
+		dataType: string
+		lineageTag: 53603f26-3010-485c-aabe-c015987e6bbb
+		sourceLineageTag: nameDest_hashed
+		summarizeBy: none
+		sourceColumn: nameDest_hashed
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_merchant_dest
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 4d1ac3df-ceb9-4f8d-bd13-013fa0e24d7e
+		sourceLineageTag: is_merchant_dest
+		summarizeBy: none
+		sourceColumn: is_merchant_dest
+
+		annotation SummarizationSetBy = Automatic
+
+	column material_risk_level
+		dataType: string
+		lineageTag: fdff2c66-98be-4635-80cb-94da24c2b946
+		sourceLineageTag: material_risk_level
+		summarizeBy: none
+		sourceColumn: material_risk_level
+
+		annotation SummarizationSetBy = Automatic
+
+	column fraud_pattern
+		dataType: string
+		lineageTag: 03ff6451-4edf-47ec-a351-ed53f068840f
+		sourceLineageTag: fraud_pattern
+		summarizeBy: none
+		sourceColumn: fraud_pattern
+
+		annotation SummarizationSetBy = Automatic
+
+	column silver_load_at
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 6e26f7a4-6590-4508-932b-7a9d59c889dd
+		sourceLineageTag: silver_load_at
+		summarizeBy: none
+		sourceColumn: silver_load_at
+
+		annotation SummarizationSetBy = Automatic
+
+	column isFlaggedFraud
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 7ab34200-0a20-4ff1-92ab-0e2fd0f8fd2c
+		sourceLineageTag: isFlaggedFraud
+		summarizeBy: none
+		sourceColumn: isFlaggedFraud
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_pii_flag
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 17cb9724-7934-4f41-9c5d-3d968510eb99
+		sourceLineageTag: is_pii_flag
+		summarizeBy: none
+		sourceColumn: is_pii_flag
+
+		annotation SummarizationSetBy = Automatic
+
+	column ingestion_timestamp
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 9029bd73-c902-48eb-8019-a769efa0148d
+		sourceLineageTag: ingestion_timestamp
+		summarizeBy: none
+		sourceColumn: ingestion_timestamp
+
+		annotation SummarizationSetBy = Automatic
+
+	column source_file
+		dataType: string
+		lineageTag: 05d5bbaf-5104-44fb-bc84-f967737668d8
+		sourceLineageTag: source_file
+		summarizeBy: none
+		sourceColumn: source_file
+
+		annotation SummarizationSetBy = Automatic
+
+	column job_run_id
+		dataType: string
+		lineageTag: 58dc6a90-451a-4b17-b1ed-a5e1f4e19f40
+		sourceLineageTag: job_run_id
+		summarizeBy: none
+		sourceColumn: job_run_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_new_destination
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 8f763348-21e4-4644-9a09-88f7fb6673ed
+		sourceLineageTag: is_new_destination
+		summarizeBy: none
+		sourceColumn: is_new_destination
+
+		annotation SummarizationSetBy = Automatic
+
+	column hour_of_day
+		dataType: int64
+		formatString: 0
+		lineageTag: ad07e69f-4ab3-4811-8e4c-ddfffe389782
+		sourceLineageTag: hour_of_day
+		summarizeBy: sum
+		sourceColumn: hour_of_day
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_overdraft
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 6bfe94e6-e4ce-45d9-9bb5-1d54ba9262e9
+		sourceLineageTag: is_overdraft
+		summarizeBy: none
+		sourceColumn: is_overdraft
+
+		annotation SummarizationSetBy = Automatic
+
+	column txn_category_risk
+		dataType: string
+		lineageTag: 19ceefe3-ca16-4977-ae16-a5ee58702b04
+		sourceLineageTag: txn_category_risk
+		summarizeBy: none
+		sourceColumn: txn_category_risk
+
+		annotation SummarizationSetBy = Automatic
+
+	column origin_gap
+		dataType: double
+		lineageTag: 0cbc19f5-31f3-49c4-8a71-6b0fea232096
+		sourceLineageTag: origin_gap
+		summarizeBy: sum
+		sourceColumn: origin_gap
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column dest_gap
+		dataType: double
+		lineageTag: cf67bafa-4489-4c3d-ad42-a150b3fdee07
+		sourceLineageTag: dest_gap
+		summarizeBy: sum
+		sourceColumn: dest_gap
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column quality_tier
+		dataType: string
+		lineageTag: ab157654-6378-4064-8cec-7e57a4e828cf
+		sourceLineageTag: quality_tier
+		summarizeBy: none
+		sourceColumn: quality_tier
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_untracked_destination
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 0661a95f-ff52-46aa-bf2f-144967c06437
+		sourceLineageTag: is_untracked_destination
+		summarizeBy: none
+		sourceColumn: is_untracked_destination
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_ledger_balanced
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 5f2d2a0e-f66f-473b-a8b8-0202faa3b256
+		sourceLineageTag: is_ledger_balanced
+		summarizeBy: none
+		sourceColumn: is_ledger_balanced
+
+		annotation SummarizationSetBy = Automatic
+
+	column relative_origin_error
+		dataType: double
+		lineageTag: 0d312882-2c2d-4e0c-8c0e-5def147f2643
+		sourceLineageTag: relative_origin_error
+		summarizeBy: sum
+		sourceColumn: relative_origin_error
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column temporal_risk_bucket
+		dataType: string
+		lineageTag: 403a6cc9-d19c-4436-b59b-d3397e29b9ff
+		sourceLineageTag: temporal_risk_bucket
+		summarizeBy: none
+		sourceColumn: temporal_risk_bucket
+
+		annotation SummarizationSetBy = Automatic
+
+	column fund_direction
+		dataType: string
+		lineageTag: 468222f0-7125-4d61-a0b3-f03600179bae
+		sourceLineageTag: fund_direction
+		summarizeBy: none
+		sourceColumn: fund_direction
+
+		annotation SummarizationSetBy = Automatic
+
+	column customer_segment
+		dataType: string
+		lineageTag: ab470ed9-38a5-4b3d-a6c3-b8edf8fe0b78
+		sourceLineageTag: customer_segment
+		summarizeBy: none
+		sourceColumn: customer_segment
+
+		annotation SummarizationSetBy = Automatic
+
+	column type_risk_level
+		dataType: string
+		lineageTag: 2fdf9cc3-b9b8-46de-8520-12211a9f5629
+		sourceLineageTag: type_risk_level
+		summarizeBy: none
+		sourceColumn: type_risk_level
+
+		annotation SummarizationSetBy = Automatic
+
+	column spark_job_id
+		dataType: string
+		lineageTag: 689387ff-755a-4386-8daa-0f73edf53f57
+		sourceLineageTag: spark_job_id
+		summarizeBy: none
+		sourceColumn: spark_job_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column partition_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 55b95e78-1cea-4869-91d4-762c19d54073
+		sourceLineageTag: partition_id
+		summarizeBy: sum
+		sourceColumn: partition_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column first_digit
+		dataType: int64
+		formatString: 0
+		lineageTag: 05eee97a-4b60-440f-a946-aba833e1bf70
+		sourceLineageTag: first_digit
+		summarizeBy: sum
+		sourceColumn: first_digit
+
+		annotation SummarizationSetBy = Automatic
+
+	column prev_step
+		dataType: int64
+		formatString: 0
+		lineageTag: deafbd2f-9506-497e-af48-16d6dde9cc95
+		sourceLineageTag: prev_step
+		summarizeBy: sum
+		sourceColumn: prev_step
+
+		annotation SummarizationSetBy = Automatic
+
+	column hours_since_last_txn
+		dataType: int64
+		formatString: 0
+		lineageTag: 550d525c-41e6-4489-a505-ef085a38c58c
+		sourceLineageTag: hours_since_last_txn
+		summarizeBy: sum
+		sourceColumn: hours_since_last_txn
+
+		annotation SummarizationSetBy = Automatic
+
+	column time_since_last_txn
+		dataType: int64
+		formatString: 0
+		lineageTag: 750e4692-da28-420d-a8fd-96b03cada75e
+		sourceLineageTag: time_since_last_txn
+		summarizeBy: sum
+		sourceColumn: time_since_last_txn
+
+		annotation SummarizationSetBy = Automatic
+
+	column txns_last_24h
+		dataType: int64
+		formatString: 0
+		lineageTag: 727cc5ee-eb97-47b9-8be2-6890955161ac
+		sourceLineageTag: txns_last_24h
+		summarizeBy: sum
+		sourceColumn: txns_last_24h
+
+		annotation SummarizationSetBy = Automatic
+
+	column days_since_last_txn
+		dataType: string
+		lineageTag: c828c2ea-5f2b-4c81-9f27-36511ff06581
+		sourceLineageTag: days_since_last_txn
+		summarizeBy: none
+		sourceColumn: days_since_last_txn
+
+		annotation SummarizationSetBy = Automatic
+
+	column avg_amount
+		dataType: double
+		lineageTag: 0fd9d6bb-e311-49eb-b19c-886a28cd4bfe
+		sourceLineageTag: avg_amount
+		summarizeBy: sum
+		sourceColumn: avg_amount
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column stddev_amount
+		dataType: double
+		lineageTag: d60fb0e3-1016-47e9-95ba-d0f2c1a9b3c3
+		sourceLineageTag: stddev_amount
+		summarizeBy: sum
+		sourceColumn: stddev_amount
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column running_total_outflow
+		dataType: double
+		lineageTag: f7f0248a-334f-404e-87a4-a22731d86e80
+		sourceLineageTag: running_total_outflow
+		summarizeBy: sum
+		sourceColumn: running_total_outflow
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column drainage_ratio
+		dataType: double
+		lineageTag: d46d2e8d-e5a0-4948-be02-09e9a95daee8
+		sourceLineageTag: drainage_ratio
+		summarizeBy: sum
+		sourceColumn: drainage_ratio
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column prev_amount
+		dataType: double
+		lineageTag: 01ae693d-bcc6-4ece-b035-1898a62b81ba
+		sourceLineageTag: prev_amount
+		summarizeBy: sum
+		sourceColumn: prev_amount
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column historical_avg_amount
+		dataType: double
+		lineageTag: b893becc-323e-470c-be8f-1d55d990069f
+		sourceLineageTag: historical_avg_amount
+		summarizeBy: sum
+		sourceColumn: historical_avg_amount
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column avg_historical_amount
+		dataType: double
+		lineageTag: 386621aa-5653-4cec-a1b5-d235c45e61e9
+		sourceLineageTag: avg_historical_amount
+		summarizeBy: sum
+		sourceColumn: avg_historical_amount
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column avg_last_10_txns
+		dataType: double
+		lineageTag: e3877fef-c057-4584-90cd-92fe8cb11e69
+		sourceLineageTag: avg_last_10_txns
+		summarizeBy: sum
+		sourceColumn: avg_last_10_txns
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column behavioral_spike_ratio
+		dataType: double
+		lineageTag: 66d8bf82-385c-4681-b93f-5ebae1c8ca66
+		sourceLineageTag: behavioral_spike_ratio
+		summarizeBy: sum
+		sourceColumn: behavioral_spike_ratio
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column behavioral_anomaly
+		dataType: string
+		lineageTag: 8706ad43-fb3c-4e60-b17e-166fdf750cd1
+		sourceLineageTag: behavioral_anomaly
+		summarizeBy: none
+		sourceColumn: behavioral_anomaly
+
+		annotation SummarizationSetBy = Automatic
+
+	column rank_in_type
+		dataType: int64
+		formatString: 0
+		lineageTag: ef75bd98-abac-4f2f-9f5c-7bc9d4bf6822
+		sourceLineageTag: rank_in_type
+		summarizeBy: sum
+		sourceColumn: rank_in_type
+
+		annotation SummarizationSetBy = Automatic
+
+	column transaction_rank_history
+		dataType: int64
+		formatString: 0
+		lineageTag: 6511ce4e-c50b-4af9-88ca-2a787fd88044
+		sourceLineageTag: transaction_rank_history
+		summarizeBy: sum
+		sourceColumn: transaction_rank_history
+
+		annotation SummarizationSetBy = Automatic
+
+	column action_rank
+		dataType: int64
+		formatString: 0
+		lineageTag: 42abe831-2f05-45c9-ac61-cd4531fa0d3a
+		sourceLineageTag: action_rank
+		summarizeBy: sum
+		sourceColumn: action_rank
+
+		annotation SummarizationSetBy = Automatic
+
+	column account_activity
+		dataType: string
+		lineageTag: 1f574f17-8884-4011-b43f-2b24843d6d35
+		sourceLineageTag: account_activity
+		summarizeBy: none
+		sourceColumn: account_activity
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_math_correct
+		dataType: int64
+		formatString: 0
+		lineageTag: a22342f4-7d17-4b9b-b0c8-8110bf64094f
+		sourceLineageTag: is_math_correct
+		summarizeBy: sum
+		sourceColumn: is_math_correct
+
+		annotation SummarizationSetBy = Automatic
+
+	column cumulative_integrity_failures
+		dataType: int64
+		formatString: 0
+		lineageTag: bb964554-6027-44e2-a14b-456705293b6c
+		sourceLineageTag: cumulative_integrity_failures
+		summarizeBy: sum
+		sourceColumn: cumulative_integrity_failures
+
+		annotation SummarizationSetBy = Automatic
+
+	column account_audit_status
+		dataType: string
+		lineageTag: 96f71154-95ec-4ac2-b69c-c7038b96ec99
+		sourceLineageTag: account_audit_status
+		summarizeBy: none
+		sourceColumn: account_audit_status
+
+		annotation SummarizationSetBy = Automatic
+
+	column cumulative_outflow
+		dataType: double
+		lineageTag: 18e32512-407b-4457-982e-97f3ecf30962
+		sourceLineageTag: cumulative_outflow
+		summarizeBy: sum
+		sourceColumn: cumulative_outflow
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column pct_of_total_outflow
+		dataType: double
+		lineageTag: 13dcb873-2e62-4de2-b737-e2e0ba4a538b
+		sourceLineageTag: pct_of_total_outflow
+		summarizeBy: sum
+		sourceColumn: pct_of_total_outflow
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column start_date
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: d9972f97-01d3-499b-8c39-bb8e8a6fc006
+		sourceLineageTag: start_date
+		summarizeBy: none
+		sourceColumn: start_date
+
+		annotation SummarizationSetBy = Automatic
+
+	partition fact_transactions = entity
+		mode: directLake
+		source
+			entityName: fact_transactions
+			schemaName: gold
+			expressionSource: 'DirectLake - lh_banking_transactions'
+
