@@ -1,0 +1,94 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
+  "name": "9d30567f80961cfb8e35",
+  "position": {
+    "x": 896.08005913458817,
+    "y": 512.887928583613,
+    "z": 10,
+    "height": 526.64354352646842,
+    "width": 672.0600443509411,
+    "tabOrder": 10
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fact_transactions"
+                    }
+                  },
+                  "Property": "amount"
+                }
+              },
+              "queryRef": "fact_transactions.amount",
+              "nativeQueryRef": "amount"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dim_account"
+                    }
+                  },
+                  "Property": "nameOrig_hashed"
+                }
+              },
+              "queryRef": "dim_account.nameOrig_hashed",
+              "nativeQueryRef": "nameOrig_hashed"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fact_transactions"
+                    }
+                  },
+                  "Property": "z_score"
+                }
+              },
+              "queryRef": "fact_transactions.z_score",
+              "nativeQueryRef": "z_score"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fact_transactions"
+                    }
+                  },
+                  "Property": "txns_last_24h"
+                }
+              },
+              "queryRef": "fact_transactions.txns_last_24h",
+              "nativeQueryRef": "txns_last_24h"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dim_transaction_type"
+                    }
+                  },
+                  "Property": "type_risk_level"
+                }
+              },
+              "queryRef": "dim_transaction_type.type_risk_level",
+              "nativeQueryRef": "type_risk_level"
+            }
+          ]
+        }
+      }
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

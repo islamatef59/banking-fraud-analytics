@@ -2,8 +2,8 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "e4faab22d6e042961ace",
   "position": {
-    "x": 1409.9037233859,
-    "y": 646.64757237999925,
+    "x": 23.581054187752319,
+    "y": 332.09984647751185,
     "z": 7,
     "height": 280,
     "width": 280,
@@ -11,6 +11,65 @@
   },
   "visual": {
     "visualType": "barChart",
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dim_transaction_type"
+                    }
+                  },
+                  "Property": "txn_category_risk"
+                }
+              },
+              "queryRef": "dim_transaction_type.txn_category_risk",
+              "nativeQueryRef": "txn_category_risk",
+              "active": true
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fact_transactions"
+                    }
+                  },
+                  "Property": "Total Fraud Volume"
+                }
+              },
+              "queryRef": "fact_transactions.Total Fraud Volume",
+              "nativeQueryRef": "Total Fraud Volume"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "fact_transactions"
+                  }
+                },
+                "Property": "Total Fraud Volume"
+              }
+            },
+            "direction": "Descending"
+          }
+        ],
+        "isDefaultSort": true
+      }
+    },
     "drillFilterOtherVisuals": true
   }
 }

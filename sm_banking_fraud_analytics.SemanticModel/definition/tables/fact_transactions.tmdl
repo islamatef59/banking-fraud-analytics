@@ -34,11 +34,12 @@ table fact_transactions
 		changedProperty = Name
 
 	measure 'Fraud Rate %' = DIVIDE([Total Fraud Volume], [Total Volume], 0)
+		formatString: 0.00%;-0.00%;0.00%
 		lineageTag: 52b87199-9044-4c1f-852c-94d120a86685
 
 		changedProperty = Name
 
-		annotation PBI_FormatHint = {"isGeneralNumber":true}
+		changedProperty = FormatString
 
 	measure 'High Risk Txn Count' = ```
 			

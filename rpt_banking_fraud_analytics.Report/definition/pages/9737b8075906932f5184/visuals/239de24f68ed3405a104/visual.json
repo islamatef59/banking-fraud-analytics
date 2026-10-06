@@ -2,8 +2,8 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "239de24f68ed3405a104",
   "position": {
-    "x": 23,
-    "y": 382,
+    "x": 337.9951100244499,
+    "y": 332.09984647751185,
     "z": 9,
     "height": 280,
     "width": 280,
@@ -11,6 +11,65 @@
   },
   "visual": {
     "visualType": "lineChart",
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dim_date"
+                    }
+                  },
+                  "Property": "step"
+                }
+              },
+              "queryRef": "dim_date.step",
+              "nativeQueryRef": "step",
+              "active": true
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fact_transactions"
+                    }
+                  },
+                  "Property": "Total Fraud Volume"
+                }
+              },
+              "queryRef": "fact_transactions.Total Fraud Volume",
+              "nativeQueryRef": "Total Fraud Volume"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "fact_transactions"
+                  }
+                },
+                "Property": "Total Fraud Volume"
+              }
+            },
+            "direction": "Descending"
+          }
+        ],
+        "isDefaultSort": true
+      }
+    },
     "drillFilterOtherVisuals": true
   }
 }

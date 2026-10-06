@@ -11,6 +11,65 @@
   },
   "visual": {
     "visualType": "donutChart",
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dim_transaction_type"
+                    }
+                  },
+                  "Property": "type_risk_level"
+                }
+              },
+              "queryRef": "dim_transaction_type.type_risk_level",
+              "nativeQueryRef": "type_risk_level",
+              "active": true
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fact_transactions"
+                    }
+                  },
+                  "Property": "Total Fraud Volume"
+                }
+              },
+              "queryRef": "fact_transactions.Total Fraud Volume",
+              "nativeQueryRef": "Total Fraud Volume"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "fact_transactions"
+                  }
+                },
+                "Property": "Total Fraud Volume"
+              }
+            },
+            "direction": "Descending"
+          }
+        ],
+        "isDefaultSort": true
+      }
+    },
     "drillFilterOtherVisuals": true
   }
 }
