@@ -9,13 +9,15 @@ table fact_transactions
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	measure 'Total Fraud Volume' = ```
+	measure 'Total Fraud Volume' =
 			
-			CALCULATE(
-			    SUM(fact_transactions[amount]), 
-			    fact_transactions[isfraud] = TRUE()
+			COALESCE(
+			    CALCULATE(
+			        SUM(fact_transactions[amount]),
+			        fact_transactions[type_risk_level]= "High"
+			    ),
+			    0
 			)
-			```
 		formatString: 0
 		lineageTag: 550f1853-e613-45bd-908b-bcb5a429d9a2
 
@@ -25,7 +27,7 @@ table fact_transactions
 			
 			CALCULATE(
 			    COUNTROWS(fact_transactions), 
-			    fact_transactions[isfraud] = TRUE()
+			    fact_transactions[isFraud] = TRUE()
 			)
 			```
 		formatString: 0
@@ -33,7 +35,13 @@ table fact_transactions
 
 		changedProperty = Name
 
-	measure 'Fraud Rate %' = DIVIDE([Total Fraud Volume], [Total Volume], 0)
+	measure 'Fraud Rate %' =
+			
+			DIVIDE(
+			    [Total Fraud Volume],
+			    [Total Volume],
+			    0
+			)
 		formatString: 0.00%;-0.00%;0.00%
 		lineageTag: 52b87199-9044-4c1f-852c-94d120a86685
 

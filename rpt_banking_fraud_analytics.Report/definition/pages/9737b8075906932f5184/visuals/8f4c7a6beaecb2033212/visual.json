@@ -1,13 +1,13 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
-  "name": "e4faab22d6e042961ace",
+  "name": "8f4c7a6beaecb2033212",
   "position": {
-    "x": 328.80035677122049,
+    "x": 820.28839006986777,
     "y": 357.91288836033897,
-    "z": 7,
-    "height": 361.33789207670583,
-    "width": 436.68797383677719,
-    "tabOrder": 7
+    "z": 14,
+    "height": 280,
+    "width": 280,
+    "tabOrder": 14
   },
   "visual": {
     "visualType": "clusteredBarChart",
@@ -20,14 +20,14 @@
                 "Column": {
                   "Expression": {
                     "SourceRef": {
-                      "Entity": "fact_transactions"
+                      "Entity": "dim_transaction_type"
                     }
                   },
-                  "Property": "type_risk_level"
+                  "Property": "txn_category_risk"
                 }
               },
-              "queryRef": "fact_transactions.type_risk_level",
-              "nativeQueryRef": "type_risk_level",
+              "queryRef": "dim_transaction_type.txn_category_risk",
+              "nativeQueryRef": "txn_category_risk",
               "active": true
             }
           ]
@@ -71,6 +71,19 @@
       }
     },
     "objects": {
+      "zoom": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            }
+          }
+        }
+      ],
       "labels": [
         {
           "properties": {
@@ -107,36 +120,21 @@
   "filterConfig": {
     "filters": [
       {
-        "name": "8dd11c34a046503cdc2c",
+        "name": "32423406e4cc84a086fc",
         "field": {
           "Column": {
             "Expression": {
               "SourceRef": {
-                "Entity": "fact_transactions"
+                "Entity": "dim_transaction_type"
               }
             },
-            "Property": "type_risk_level"
+            "Property": "txn_category_risk"
           }
         },
-        "type": "Categorical",
-        "objects": {
-          "general": [
-            {
-              "properties": {
-                "isInvertedSelectionMode": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "true"
-                    }
-                  }
-                }
-              }
-            }
-          ]
-        }
+        "type": "Categorical"
       },
       {
-        "name": "a52119a7c9d6112d41fd",
+        "name": "4ab34a608265f5e2afd4",
         "field": {
           "Measure": {
             "Expression": {

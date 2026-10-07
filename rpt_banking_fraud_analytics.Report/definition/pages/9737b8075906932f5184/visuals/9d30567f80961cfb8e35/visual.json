@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "9d30567f80961cfb8e35",
   "position": {
-    "x": 896.08005913458817,
-    "y": 512.887928583613,
+    "x": 290.85501858736058,
+    "y": 736.95167286245351,
     "z": 10,
-    "height": 526.64354352646842,
-    "width": 672.0600443509411,
+    "height": 342.6022304832714,
+    "width": 1629.1449814126395,
     "tabOrder": 10
   },
   "visual": {
@@ -90,5 +90,79 @@
       }
     },
     "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "504bc757c46311c6a5fa",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "fact_transactions"
+              }
+            },
+            "Property": "amount"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "72ee981e819bc00ad6e5",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dim_account"
+              }
+            },
+            "Property": "nameOrig_hashed"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "c63bbfa71628c0bdaa1d",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "fact_transactions"
+              }
+            },
+            "Property": "z_score"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "3b02877b4a3f7e1fd07c",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "fact_transactions"
+              }
+            },
+            "Property": "txns_last_24h"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "d0e3bddb6280d8433ab6",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dim_transaction_type"
+              }
+            },
+            "Property": "type_risk_level"
+          }
+        },
+        "type": "Categorical"
+      }
+    ]
   }
 }

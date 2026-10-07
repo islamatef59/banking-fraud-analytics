@@ -2,8 +2,8 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "239de24f68ed3405a104",
   "position": {
-    "x": 337.9951100244499,
-    "y": 332.09984647751185,
+    "x": 1538.1412639405205,
+    "y": 358.66171003717471,
     "z": 9,
     "height": 280,
     "width": 280,
@@ -70,6 +70,57 @@
         "isDefaultSort": true
       }
     },
+    "objects": {
+      "lineStyles": [
+        {
+          "properties": {
+            "strokeColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#6B21A8'"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
     "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "aa9f77d452d232aaf74e",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dim_date"
+              }
+            },
+            "Property": "step"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "fa44367055f7da5a7f26",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "fact_transactions"
+              }
+            },
+            "Property": "Total Fraud Volume"
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
   }
 }
