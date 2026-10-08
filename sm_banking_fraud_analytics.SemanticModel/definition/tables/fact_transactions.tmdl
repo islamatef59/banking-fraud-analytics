@@ -11,10 +11,12 @@ table fact_transactions
 
 	measure 'Total Fraud Volume' =
 			
+			VAR SelectedRisk = SELECTEDVALUE(fact_transactions[type_risk_level], "High")
+			RETURN
 			COALESCE(
 			    CALCULATE(
 			        SUM(fact_transactions[amount]),
-			        fact_transactions[type_risk_level]= "High"
+			        fact_transactions[isFraud] = IF(SelectedRisk = "High", TRUE(), FALSE())
 			    ),
 			    0
 			)
@@ -35,13 +37,7 @@ table fact_transactions
 
 		changedProperty = Name
 
-	measure 'Fraud Rate %' =
-			
-			DIVIDE(
-			    [Total Fraud Volume],
-			    [Total Volume],
-			    0
-			)
+	measure 'Fraud Rate %' = DIVIDE([Total Fraud Volume], [Total Volume], 0)
 		formatString: 0.00%;-0.00%;0.00%
 		lineageTag: 52b87199-9044-4c1f-852c-94d120a86685
 
@@ -58,6 +54,20 @@ table fact_transactions
 			```
 		formatString: 0
 		lineageTag: 977bd3a4-f065-4f15-adcf-b53729f6f8d4
+
+		changedProperty = Name
+
+	measure 'Non Fraud Count' =
+			
+			COALESCE(
+			    CALCULATE(
+			        COUNTROWS(fact_transactions),
+			        fact_transactions[isFraud] = FALSE()
+			    ),
+			    0
+			)
+		formatString: 0
+		lineageTag: bd147f5b-0f25-41af-9faa-45141123d790
 
 		changedProperty = Name
 

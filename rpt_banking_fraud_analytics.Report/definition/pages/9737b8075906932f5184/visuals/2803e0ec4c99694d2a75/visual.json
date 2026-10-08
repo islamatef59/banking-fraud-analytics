@@ -2,8 +2,8 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "2803e0ec4c99694d2a75",
   "position": {
-    "x": 9.8254392448967991,
-    "y": 3.93017569795872,
+    "x": 10.27501114910064,
+    "y": 1.71250185818344,
     "z": 12,
     "height": 181,
     "width": 280,
@@ -23,11 +23,11 @@
                       "Entity": "fact_transactions"
                     }
                   },
-                  "Property": "type_risk_level"
+                  "Property": "isFraud"
                 }
               },
-              "queryRef": "fact_transactions.type_risk_level",
-              "nativeQueryRef": "type_risk_level",
+              "queryRef": "fact_transactions.isFraud",
+              "nativeQueryRef": "isFraud",
               "active": true
             }
           ]
@@ -80,7 +80,7 @@
                                   "Source": "f"
                                 }
                               },
-                              "Property": "type_risk_level"
+                              "Property": "isFraud"
                             }
                           }
                         ],
@@ -88,7 +88,7 @@
                           [
                             {
                               "Literal": {
-                                "Value": "'Low'"
+                                "Value": "true"
                               }
                             }
                           ]
@@ -131,85 +131,55 @@
         }
       ]
     },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Is Fraud'"
+                }
+              }
+            },
+            "heading": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Heading5'"
+                }
+              }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "22D"
+                }
+              }
+            },
+            "alignment": {
+              "expr": {
+                "Literal": {
+                  "Value": "'center'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
     "drillFilterOtherVisuals": true
   },
   "filterConfig": {
     "filters": [
       {
-        "name": "5eda909a8ae33522e270",
-        "field": {
-          "Column": {
-            "Expression": {
-              "SourceRef": {
-                "Entity": "dim_transaction_type"
-              }
-            },
-            "Property": "type_risk_level"
-          }
-        },
-        "type": "Categorical",
-        "filter": {
-          "Version": 2,
-          "From": [
-            {
-              "Name": "d",
-              "Entity": "dim_transaction_type",
-              "Type": 0
-            }
-          ],
-          "Where": [
-            {
-              "Condition": {
-                "Not": {
-                  "Expression": {
-                    "In": {
-                      "Expressions": [
-                        {
-                          "Column": {
-                            "Expression": {
-                              "SourceRef": {
-                                "Source": "d"
-                              }
-                            },
-                            "Property": "type_risk_level"
-                          }
-                        }
-                      ],
-                      "Values": [
-                        [
-                          {
-                            "Literal": {
-                              "Value": "null"
-                            }
-                          }
-                        ]
-                      ]
-                    }
-                  }
-                }
-              }
-            }
-          ]
-        },
-        "howCreated": "User",
-        "objects": {
-          "general": [
-            {
-              "properties": {
-                "isInvertedSelectionMode": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "true"
-                    }
-                  }
-                }
-              }
-            }
-          ]
-        }
-      },
-      {
-        "name": "d37d706ce504d91c5412",
+        "name": "eaaf60db7f6bcb6f8ceb",
         "field": {
           "Column": {
             "Expression": {
@@ -217,25 +187,10 @@
                 "Entity": "fact_transactions"
               }
             },
-            "Property": "type_risk_level"
+            "Property": "isFraud"
           }
         },
-        "type": "Categorical",
-        "objects": {
-          "general": [
-            {
-              "properties": {
-                "isInvertedSelectionMode": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "true"
-                    }
-                  }
-                }
-              }
-            }
-          ]
-        }
+        "type": "Categorical"
       }
     ]
   }
