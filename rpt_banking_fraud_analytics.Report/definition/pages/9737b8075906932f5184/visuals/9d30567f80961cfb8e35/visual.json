@@ -2,8 +2,8 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "9d30567f80961cfb8e35",
   "position": {
-    "x": 424.42323408323438,
-    "y": 788.21457758314955,
+    "x": 422.89962825278809,
+    "y": 804.75836431226764,
     "z": 10,
     "height": 223.04832713754647,
     "width": 1366.8401486988848,
@@ -98,7 +98,7 @@
                     "Entity": "fact_transactions"
                   }
                 },
-                "Property": "txns_last_24h"
+                "Property": "z_score"
               }
             },
             "direction": "Ascending"
@@ -345,6 +345,13 @@
                     [
                       {
                         "Literal": {
+                          "Value": "'Low'"
+                        }
+                      }
+                    ],
+                    [
+                      {
+                        "Literal": {
                           "Value": "'High'"
                         }
                       }
@@ -358,15 +365,7 @@
         "objects": {
           "general": [
             {
-              "properties": {
-                "requireSingleSelect": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "true"
-                    }
-                  }
-                }
-              }
+              "properties": {}
             }
           ]
         }

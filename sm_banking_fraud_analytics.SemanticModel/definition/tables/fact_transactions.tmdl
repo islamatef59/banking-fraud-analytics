@@ -18,28 +18,23 @@ table fact_transactions
 
 	measure 'Total Fraud Volume' =
 			
-			CALCULATE(
-			    SUM(fact_transactions[amount]),
-			    fact_transactions[isFraud] = TRUE()
-			)
+			VAR _Vol = CALCULATE(SUM(fact_transactions[amount]), fact_transactions[isFraud] = TRUE())
+			RETURN COALESCE(_Vol, 0)
 		formatString: 0
 		lineageTag: 550f1853-e613-45bd-908b-bcb5a429d9a2
 
 		changedProperty = Name
 
-	measure 'Fraud Count' = ```
+	measure 'Fraud Count' =
 			
-			CALCULATE(
-			    COUNTROWS(fact_transactions), 
-			    fact_transactions[isFraud] = TRUE()
-			)
-			```
+			VAR _Count = CALCULATE(COUNTROWS(fact_transactions), fact_transactions[isFraud] = TRUE())
+			RETURN COALESCE(_Count, 0)
 		formatString: 0
 		lineageTag: d25407d8-0644-45c9-b8ed-0ddc915bc2bb
 
 		changedProperty = Name
 
-	measure 'Fraud Rate %' = DIVIDE([Total Fraud Volume], [Total Volume], 0)
+	measure 'Fraud Rate %' = COALESCE(DIVIDE([Total Fraud Volume], [Total Volume], 0),0)
 		formatString: 0.00%;-0.00%;0.00%
 		lineageTag: 52b87199-9044-4c1f-852c-94d120a86685
 
@@ -48,11 +43,11 @@ table fact_transactions
 		changedProperty = FormatString
 
 	measure 'High Risk Txn Count' = ```
-			
+			COALESCE(
 			CALCULATE(
 			    COUNTROWS(fact_transactions), 
 			    fact_transactions[type_risk_level] IN {"HIGH", "CRITICAL"}
-			)
+			),0)
 			```
 		formatString: 0
 		lineageTag: 977bd3a4-f065-4f15-adcf-b53729f6f8d4
@@ -73,10 +68,12 @@ table fact_transactions
 
 		changedProperty = Name
 
-	measure 'Formatted Amount' = FORMAT(SELECTEDVALUE(fact_transactions[amount]), "$#,##0.00")
+	measure 'Formatted Amount' = COALESCE(FORMAT(SELECTEDVALUE(fact_transactions[amount]), "$#,##0.00"),0)
 		lineageTag: 4812f3de-c115-46f8-ac61-d2b9badc4685
 
 		changedProperty = Name
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
 	column transaction_sk
 		dataType: string
