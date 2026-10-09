@@ -23,11 +23,11 @@
                       "Entity": "fact_transactions"
                     }
                   },
-                  "Property": "isFraud"
+                  "Property": "type_risk_level"
                 }
               },
-              "queryRef": "fact_transactions.isFraud",
-              "nativeQueryRef": "isFraud",
+              "queryRef": "fact_transactions.type_risk_level",
+              "nativeQueryRef": "type_risk_level",
               "active": true
             }
           ]
@@ -80,7 +80,7 @@
                                   "Source": "f"
                                 }
                               },
-                              "Property": "isFraud"
+                              "Property": "type_risk_level"
                             }
                           }
                         ],
@@ -88,7 +88,7 @@
                           [
                             {
                               "Literal": {
-                                "Value": "true"
+                                "Value": "'High'"
                               }
                             }
                           ]
@@ -179,7 +179,7 @@
   "filterConfig": {
     "filters": [
       {
-        "name": "eaaf60db7f6bcb6f8ceb",
+        "name": "6309f7c100d86928daa9",
         "field": {
           "Column": {
             "Expression": {
@@ -187,10 +187,25 @@
                 "Entity": "fact_transactions"
               }
             },
-            "Property": "isFraud"
+            "Property": "type_risk_level"
           }
         },
-        "type": "Categorical"
+        "type": "Categorical",
+        "objects": {
+          "general": [
+            {
+              "properties": {
+                "requireSingleSelect": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "true"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
       }
     ]
   }

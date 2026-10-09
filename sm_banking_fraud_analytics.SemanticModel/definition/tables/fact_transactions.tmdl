@@ -2,7 +2,14 @@ table fact_transactions
 	lineageTag: 8e108986-c5e6-4ed7-a726-3c07ede1f443
 	sourceLineageTag: [gold].[fact_transactions]
 
-	measure 'Total Volume' = SUM(fact_transactions[amount])
+	measure 'Total Volume' = ```
+			
+			CALCULATE(
+			    SUM(fact_transactions[amount]),
+			    REMOVEFILTERS(fact_transactions[type_risk_level])
+			    
+			)
+			```
 		lineageTag: 3d47689f-21e2-435d-b2d2-e93cd843e2ca
 
 		changedProperty = Name
@@ -11,14 +18,9 @@ table fact_transactions
 
 	measure 'Total Fraud Volume' =
 			
-			VAR SelectedRisk = SELECTEDVALUE(fact_transactions[type_risk_level], "High")
-			RETURN
-			COALESCE(
-			    CALCULATE(
-			        SUM(fact_transactions[amount]),
-			        fact_transactions[isFraud] = IF(SelectedRisk = "High", TRUE(), FALSE())
-			    ),
-			    0
+			CALCULATE(
+			    SUM(fact_transactions[amount]),
+			    fact_transactions[isFraud] = 1
 			)
 		formatString: 0
 		lineageTag: 550f1853-e613-45bd-908b-bcb5a429d9a2
