@@ -50,6 +50,17 @@
           "type": "BaseTheme"
         }
       ]
+    },
+    {
+      "name": "RegisteredResources",
+      "type": "RegisteredResources",
+      "items": [
+        {
+          "name": "Screenshot_2024-10-02_11384427780010894395846.png",
+          "path": "Screenshot_2024-10-02_11384427780010894395846.png",
+          "type": "Image"
+        }
+      ]
     }
   ],
   "settings": {

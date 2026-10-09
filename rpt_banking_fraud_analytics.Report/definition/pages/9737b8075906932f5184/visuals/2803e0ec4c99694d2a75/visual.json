@@ -129,6 +129,19 @@
             }
           }
         }
+      ],
+      "selection": [
+        {
+          "properties": {
+            "strictSingleSelect": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            }
+          }
+        }
       ]
     },
     "visualContainerObjects": {
@@ -145,7 +158,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Is Fraud'"
+                  "Value": "'type risk level'"
                 }
               }
             },

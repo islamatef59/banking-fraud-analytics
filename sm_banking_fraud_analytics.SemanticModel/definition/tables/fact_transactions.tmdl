@@ -20,7 +20,7 @@ table fact_transactions
 			
 			CALCULATE(
 			    SUM(fact_transactions[amount]),
-			    fact_transactions[isFraud] = 1
+			    fact_transactions[isFraud] = TRUE()
 			)
 		formatString: 0
 		lineageTag: 550f1853-e613-45bd-908b-bcb5a429d9a2
