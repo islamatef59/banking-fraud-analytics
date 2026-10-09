@@ -73,6 +73,11 @@ table fact_transactions
 
 		changedProperty = Name
 
+	measure 'Formatted Amount' = FORMAT(SELECTEDVALUE(fact_transactions[amount]), "$#,##0.00")
+		lineageTag: 4812f3de-c115-46f8-ac61-d2b9badc4685
+
+		changedProperty = Name
+
 	column transaction_sk
 		dataType: string
 		lineageTag: 88013db6-074f-4191-8600-7796624b0055

@@ -23,25 +23,25 @@
                       "Entity": "fact_transactions"
                     }
                   },
-                  "Property": "z_score"
+                  "Property": "nameOrig_hashed"
                 }
               },
-              "queryRef": "fact_transactions.z_score",
-              "nativeQueryRef": "z_score"
+              "queryRef": "fact_transactions.nameOrig_hashed",
+              "nativeQueryRef": "nameOrig_hashed"
             },
             {
               "field": {
-                "Column": {
+                "Measure": {
                   "Expression": {
                     "SourceRef": {
                       "Entity": "fact_transactions"
                     }
                   },
-                  "Property": "txns_last_24h"
+                  "Property": "Formatted Amount"
                 }
               },
-              "queryRef": "fact_transactions.txns_last_24h",
-              "nativeQueryRef": "txns_last_24h"
+              "queryRef": "fact_transactions.Formatted Amount",
+              "nativeQueryRef": "Formatted Amount"
             },
             {
               "field": {
@@ -65,11 +65,11 @@
                       "Entity": "fact_transactions"
                     }
                   },
-                  "Property": "amount"
+                  "Property": "z_score"
                 }
               },
-              "queryRef": "Sum(fact_transactions.amount)",
-              "nativeQueryRef": "amount"
+              "queryRef": "fact_transactions.z_score",
+              "nativeQueryRef": "z_score"
             },
             {
               "field": {
@@ -79,14 +79,31 @@
                       "Entity": "fact_transactions"
                     }
                   },
-                  "Property": "nameOrig_hashed"
+                  "Property": "txns_last_24h"
                 }
               },
-              "queryRef": "fact_transactions.nameOrig_hashed",
-              "nativeQueryRef": "nameOrig_hashed"
+              "queryRef": "fact_transactions.txns_last_24h",
+              "nativeQueryRef": "txns_last_24h"
             }
           ]
         }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "fact_transactions"
+                  }
+                },
+                "Property": "txns_last_24h"
+              }
+            },
+            "direction": "Ascending"
+          }
+        ]
       }
     },
     "objects": {
@@ -210,16 +227,16 @@
       "columnFormatting": [
         {
           "properties": {
-            "styleTotal": {
+            "styleValues": {
               "expr": {
                 "Literal": {
-                  "Value": "false"
+                  "Value": "true"
                 }
               }
             }
           },
           "selector": {
-            "metadata": "Sum(fact_transactions.amount)"
+            "metadata": "fact_transactions.z_score"
           }
         }
       ]
@@ -355,123 +372,7 @@
         }
       },
       {
-        "name": "f61d0d3485e6a7e55469",
-        "field": {
-          "Column": {
-            "Expression": {
-              "SourceRef": {
-                "Entity": "fact_transactions"
-              }
-            },
-            "Property": "amount"
-          }
-        },
-        "type": "TopN",
-        "filter": {
-          "Version": 2,
-          "From": [
-            {
-              "Name": "subquery",
-              "Expression": {
-                "Subquery": {
-                  "Query": {
-                    "Version": 2,
-                    "From": [
-                      {
-                        "Name": "f",
-                        "Entity": "fact_transactions",
-                        "Type": 0
-                      }
-                    ],
-                    "Select": [
-                      {
-                        "Column": {
-                          "Expression": {
-                            "SourceRef": {
-                              "Source": "f"
-                            }
-                          },
-                          "Property": "amount"
-                        },
-                        "Name": "field"
-                      }
-                    ],
-                    "OrderBy": [
-                      {
-                        "Direction": 2,
-                        "Expression": {
-                          "Aggregation": {
-                            "Expression": {
-                              "Column": {
-                                "Expression": {
-                                  "SourceRef": {
-                                    "Source": "f"
-                                  }
-                                },
-                                "Property": "amount"
-                              }
-                            },
-                            "Function": 0
-                          }
-                        }
-                      }
-                    ],
-                    "Top": 1000
-                  }
-                }
-              },
-              "Type": 2
-            },
-            {
-              "Name": "f",
-              "Entity": "fact_transactions",
-              "Type": 0
-            }
-          ],
-          "Where": [
-            {
-              "Condition": {
-                "In": {
-                  "Expressions": [
-                    {
-                      "Column": {
-                        "Expression": {
-                          "SourceRef": {
-                            "Source": "f"
-                          }
-                        },
-                        "Property": "amount"
-                      }
-                    }
-                  ],
-                  "Table": {
-                    "SourceRef": {
-                      "Source": "subquery"
-                    }
-                  }
-                }
-              }
-            }
-          ]
-        },
-        "objects": {
-          "general": [
-            {
-              "properties": {
-                "isInvertedSelectionMode": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "true"
-                    }
-                  }
-                }
-              }
-            }
-          ]
-        }
-      },
-      {
-        "name": "55ae00ac6283875cd19a",
+        "name": "abdf294f2b033ff07505",
         "field": {
           "Column": {
             "Expression": {
@@ -483,6 +384,20 @@
           }
         },
         "type": "Categorical"
+      },
+      {
+        "name": "36c970c1abc351cdfe6e",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "fact_transactions"
+              }
+            },
+            "Property": "Formatted Amount"
+          }
+        },
+        "type": "Advanced"
       }
     ]
   }
