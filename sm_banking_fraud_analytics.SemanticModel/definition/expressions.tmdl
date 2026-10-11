@@ -1,6 +1,6 @@
 expression 'DirectLake - lh_banking_transactions' =
 		let
-		    Source = AzureStorage.DataLake("https://onelake.dfs.fabric.microsoft.com/614d5d24-d74c-4eed-837f-98a82699d6dc/259b2f49-bfe7-4cd2-830c-eec555762d22", [HierarchicalNavigation=true])
+		    Source = AzureStorage.DataLake("https://onelake.dfs.fabric.microsoft.com/55d949cb-dda8-4e9a-b467-70a86a061a7b/a93fdddf-f2f6-4b97-9ede-0a31911e78d2", [HierarchicalNavigation=true])
 		in
 		    Source
 	lineageTag: dc983c0c-1beb-4eca-b191-9ebb0ad86421
