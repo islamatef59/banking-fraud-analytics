@@ -6,8 +6,9 @@ An enterprise-grade Data Engineering & Advanced Analytics Lakehouse architecture
 ## 📐 Architecture Overview
 
 The system follows a production-grade Medallion Architecture (Bronze → Silver → Gold) with integrated security, automated data quality gates, quarantine mechanics, and pipeline orchestration alerts[cite: 18].
+<p align="center">
 <img width="300" height="300" align="center"  alt="Screenshot 2026-10-13 013215" src="https://github.com/user-attachments/assets/974bc2d2-1b99-467d-a120-cba1e408b94b" />
-
+</p>[
 
 
 ## ✨ Key Technical Features
@@ -26,8 +27,9 @@ The system follows a production-grade Medallion Architecture (Bronze → Silver 
 ## 🗄️ Database & Schema Design
 
 ### Star Schema Entity-Relationship Matrix
+<p align="center">
 <img width="500" height="300"  align="center" alt="Gemini_Generated_Image_35wlzy35wlzy35wl" src="https://github.com/user-attachments/assets/3365f9ad-d71f-4018-af6e-91c3337849e0" />
-
+</p>>
 
 ## 🚀 Getting Started & Execution Flow
 
