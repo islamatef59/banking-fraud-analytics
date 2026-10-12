@@ -1,3 +1,4 @@
+<img width="780" height="410" alt="Screenshot 2026-10-13 013215" src="https://github.com/user-attachments/assets/974bc2d2-1b99-467d-a120-cba1e408b94b" />
 # Enterprise Banking Fraud Analytics & Lakehouse Platform
 End-to-End Microsoft Fabric, PySpark & Delta Lake Solution
 
@@ -6,8 +7,8 @@ An enterprise-grade Data Engineering & Advanced Analytics Lakehouse architecture
 ## 📐 Architecture Overview
 
 The system follows a production-grade Medallion Architecture (Bronze → Silver → Gold) with integrated security, automated data quality gates, quarantine mechanics, and pipeline orchestration alerts[cite: 18].
+![Uploading Screenshot 2026-10-13 013215.png…]()
 
-![Architecture Flow](https://raw.githubusercontent.com/username/repository-name/main/path-to-your-image.png)
 
 ## ✨ Key Technical Features
 
