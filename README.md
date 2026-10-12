@@ -26,8 +26,8 @@ The system follows a production-grade Medallion Architecture (Bronze → Silver 
 ## 🗄️ Database & Schema Design
 
 ### Star Schema Entity-Relationship Matrix
+<img width="400" height="300" alt="Screenshot 2026-10-13 013215" src="https://github.com/user-attachments/assets/974bc2d2-1b99-467d-a120-cba1e408b94b" />
 
-![Schema Detail](https://raw.githubusercontent.com/username/repository-name/main/path-to-your-image-2.png)
 
 ## 🚀 Getting Started & Execution Flow
 
